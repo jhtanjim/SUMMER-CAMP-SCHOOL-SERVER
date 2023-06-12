@@ -30,7 +30,7 @@ async function run() {
         // ========================================================================
         // database collection
         const classCollection = client.db("campDb").collection("class")
-        const instuctorCollection = client.db("campDb").collection("instuctor")
+        // const instuctorCollection = client.db("campDb").collection("instuctor")
         const cartCollection = client.db("campDb").collection("carts");
         const userCollection = client.db("campDb").collection("users");
 
@@ -88,12 +88,12 @@ async function run() {
         // for instuctor
 
 
-        app.get('/instuctor', async (req, res) => {
-            const result = await instuctorCollection.find().toArray()
-            res.send(result)
-        })
+        // app.get('/instuctor', async (req, res) => {
+        //     const result = await instuctorCollection.find().toArray()
+        //     res.send(result)
+        // })
 
-        // for user /student
+        // for user / student
 
         app.get('/users', async (req, res) => {
             const result = await userCollection.find().toArray()
@@ -129,7 +129,7 @@ async function run() {
 
             const query = { email: email }
             const user = await userCollection.findOne(query)
-            const result = { admin: user?.role === 'instuctor' }
+            const result = { instuctor: user?.role === 'instuctor' }
             res.send(result)
         })
 
@@ -226,6 +226,15 @@ async function run() {
         })
 
         // create payment intend
+
+        app.get('/payments', async (req, res) => {
+            const result = await paymentCollection.find().toArray()
+            res.send(result)
+        })
+
+
+
+
         app.post('/create-payment-intent', async (req, res) => {
             const { price } = req.body
 
