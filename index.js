@@ -4,7 +4,6 @@ const cors = require('cors');
 const port = process.env.PORT || 5000
 require('dotenv').config()
 const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
-
 //middleware
 app.use(cors())
 app.use(express.json())
@@ -227,53 +226,40 @@ async function run() {
 
         // create payment intend
 
+
+        // create payment intent
+
+
+        // create payment intent
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
+
+
+        // payment related api
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const insertedResult = await paymentCollection.insertOne(payment);
+            const query = { _id: { $in: payment.classItems.map(id => new ObjectId(id)) } }
+            const deleteResult = await cartCollection.deleteOne(query)
+
+            res.send({ insertedResult, deleteResult });
+        })
+
         app.get('/payments', async (req, res) => {
             const result = await paymentCollection.find().toArray()
             res.send(result)
         })
-
-
-
-
-        app.post('/create-payment-intent', async (req, res) => {
-            const { price } = req.body
-
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: price,
-                currency: 'usd',
-                payment_method_types: ['card']
-            })
-            res.send({
-                clientSecret: paymentIntent.client_secret,
-            });
-        })
-
-
-        app.post('/payments', async (req, res) => {
-            const payment = req.body;
-            const insertResult = await paymentCollection.insertOne(payment);
-            const query = { _id: { $in: payment.cartItems.map(id => new ObjectId(id)) } };
-            const deleteResult = await cartCollection.deleteMany(query);
-            res.send({ insertResult, deleteResult });
-        });
-
-        // // ?payment related API
-        // app.post('/payments', async (req, res) => {
-        //     const payment = req.body
-        //     const insertResult = await paymentCollection.insertOne(payment)
-        //     const query = { _id: { $in: payment.cartItems.map(id => ObjectId(id)) } }
-        //     const deleteResult = await cartCollection.deleteMany(query)
-        //     res.send({ insertResult, deleteResult })
-        // })
-
-        //--------
-
-
-
-
-
-
-
 
 
 
