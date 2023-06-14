@@ -143,7 +143,7 @@ async function run() {
             res.send(result)
         })
 
-        // admin bananor jnnw
+        // admin
 
         app.patch('/users/admin/:id', async (req, res) => {
 
@@ -193,7 +193,7 @@ async function run() {
 
         })
 
-        //asfaseg
+
         // create payment intent
         app.post('/create-payment-intent', async (req, res) => {
             const { price } = req.body;
