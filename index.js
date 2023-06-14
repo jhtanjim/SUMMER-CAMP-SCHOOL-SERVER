@@ -193,8 +193,7 @@ async function run() {
 
         })
 
-        // agsasgasdhgashah
-        //asfgasgasg
+        //safaw
         // create payment intent
         app.post('/create-payment-intent', async (req, res) => {
             const { price } = req.body;
