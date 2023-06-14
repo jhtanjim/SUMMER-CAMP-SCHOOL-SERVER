@@ -8,7 +8,6 @@ const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 app.use(cors())
 app.use(express.json())
 
-
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.khwex9e.mongodb.net/?retryWrites=true&w=majority`;
 console.log(uri);
@@ -194,7 +193,7 @@ async function run() {
 
         })
 
-
+        // agsasgasdhgashahh
 
 
         // create payment intent
