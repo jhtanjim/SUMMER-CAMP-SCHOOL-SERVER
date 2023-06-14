@@ -194,7 +194,7 @@ async function run() {
         })
 
         // agsasgasdhgashah
-        // / afa
+
 
         // create payment intent
         app.post('/create-payment-intent', async (req, res) => {
