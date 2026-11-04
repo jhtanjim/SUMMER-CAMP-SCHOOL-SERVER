@@ -10,7 +10,6 @@ app.use(express.json())
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.khwex9e.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -90,10 +89,8 @@ async function run() {
 
         app.post('/users', async (req, res) => {
             const user = req.body;
-            console.log(user);
             const query = { email: user.email }
             const existingUser = await userCollection.findOne(query)
-            console.log('existingUser:', existingUser);
             if (existingUser) {
                 return res.send({ message: 'User Already Exist' })
             }
@@ -166,7 +163,7 @@ async function run() {
             const email = req.query.email
             // console.log(email);
             if (!email) {
-                res.send([])
+                return res.send([])
             }
             const query = { email: email }
             const result = await cartCollection.find(query).toArray()
@@ -178,7 +175,11 @@ async function run() {
 
         app.post('/carts', async (req, res) => {
             const item = req.body;
-            console.log(item);
+            // same class should not go in cart twice
+            const alreadyAdded = await cartCollection.findOne({ email: item.email, classItem: item.classItem })
+            if (alreadyAdded) {
+                return res.send({ message: 'Class already selected' })
+            }
             const result = await cartCollection.insertOne(item)
             res.send(result)
         })
@@ -197,7 +198,10 @@ async function run() {
         // create payment intent
         app.post('/create-payment-intent', async (req, res) => {
             const { price } = req.body;
-            const amount = parseInt(price * 100);
+            const amount = Math.round(parseFloat(price) * 100);
+            if (!amount || amount < 1) {
+                return res.status(400).send({ message: 'Invalid price' })
+            }
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
                 currency: 'usd',
@@ -215,9 +219,17 @@ async function run() {
             const payment = req.body;
             const insertedResult = await paymentCollection.insertOne(payment);
             const query = { _id: { $in: payment.classItems.map(id => new ObjectId(id)) } }
-            const deleteResult = await cartCollection.deleteOne(query)
+            const deleteResult = await cartCollection.deleteMany(query)
 
-            res.send({ insertedResult, deleteResult });
+            // one seat less for the class, one more student
+            if (payment.classId) {
+                await classCollection.updateOne(
+                    { _id: new ObjectId(payment.classId) },
+                    { $inc: { seat: -1, enrolled: 1 } }
+                )
+            }
+
+            res.send({ insertedId: insertedResult.insertedId, insertedResult, deleteResult });
         })
 
         app.get('/payments', async (req, res) => {
